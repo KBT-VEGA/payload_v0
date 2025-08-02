@@ -4,7 +4,7 @@
 #include <DHT.h>
 #include <cmath>
 
-#define DHTPIN 17
+#define DHTPIN 4
 #define DHTTYPE DHT11
 
 class DHT11_Driver {
