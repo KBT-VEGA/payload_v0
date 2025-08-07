@@ -211,10 +211,32 @@ void stateMachineUpdate() {
     if (detectLanding()) {
       currentState = POSTLAND;
       Serial.println("Transition to POSTLAND");
-      // TODO: power down heavy sensors
-      // implement power down(de initialization) functions in drivers
+      // Power down heavy sensors (do this once)
+      static bool powerDownComplete = false;
+      if (!powerDownComplete) {
+        Serial.println("Powering down sensors...");
+        if (mpu_ptr)
+          mpu_ptr->powerDown();
+        if (compass_ptr)
+          compass_ptr->powerDown(); // Add this method
+        if (bmp_ptr)
+          bmp_ptr->powerDown();
+        // Keep GPS and SD card active for recovery data logging
+        powerDownComplete = true;
+      }
 
-      // start recovery beacon
+      // Keep GPS active for location reporting
+      // if (gps_ptr) {
+      //   gps_ptr->read();
+      //   if (gps_ptr->locationUpdated()) {
+      //     // Log GPS coordinates to SD for recovery
+      //     String gpsData = String(gps_ptr->latitude(), 6) + "," +
+      //                      String(gps_ptr->longitude(), 6);
+      //     if (sd_ptr)
+      //       sd_ptr->writeLine("/recovery.txt", gpsData);
+      //   }
+      // }
+
       if (buzzer_ptr) {
         // TODO: beeping pattern?
         buzzer_ptr->startTone(2000); // 2kHz tone
