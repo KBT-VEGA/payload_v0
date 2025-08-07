@@ -5,6 +5,7 @@
 #include "../include/mpu6050_driver.h"
 #include "../include/compass_driver.h"
 #include "../include/gps_driver.h"
+#include "../include/sdcard_driver.h"
 
 BMP280_Driver bmp;
 DHT11_Driver dht;
@@ -12,6 +13,7 @@ MPU6050_Driver imu;
 Compass_Driver compass;
 GPS_Driver gps;
 Buzzer_Driver buzzer;
+SDCard_Driver sdcard;
 
 void setup() {
   Serial.begin(115200);
@@ -26,6 +28,8 @@ void setup() {
   gps.begin(16, 17, 115200);
 
   buzzer.begin(27);
+
+  sdcard.begin();
 
   stateMachineInit(bmp, dht, imu, compass, gps, buzzer);
 }
