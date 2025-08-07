@@ -12,8 +12,8 @@ public:
       : _csPin(csPin), _initialized(false) {}
 
   // Initialize SD card; return true on success
-  bool begin() {
-    if (SD.begin(_csPin)) {
+  bool begin(uint8_t csPin) {
+    if (SD.begin(csPin)) {
       _initialized = true;
       return true;
     }
