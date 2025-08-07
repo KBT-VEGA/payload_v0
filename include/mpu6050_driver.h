@@ -26,6 +26,10 @@ public:
     gz = gyroZ / 131.0f;
   }
 
+  void powerDown() {
+    mpu.setSleepEnabled(true); // Put MPU6050 to sleep
+  }
+
 private:
   MPU6050 mpu;
 };

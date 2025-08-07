@@ -33,6 +33,10 @@ public:
 
   double hdop() { return gps.hdop.hdop(); }
 
+  void powerDown() {
+    serial_gps.end(); // Close serial connection
+  }
+
 private:
   HardwareSerial serial_gps;
   TinyGPSPlus gps;

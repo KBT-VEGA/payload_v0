@@ -17,6 +17,14 @@ public:
     return bmp.readAltitude(seaLevel_hPa);
   }
 
+  void powerDown() {
+    // BMP280 doesn't have explicit power down, but you can:
+    // 1. Stop reading from it
+    // 2. Set it to sleep mode if library supports it
+    // For now, just document that we stop using it
+    Serial.println("Stop reading from BMP280");
+  }
+
 private:
   Adafruit_BMP280 bmp;
 };
