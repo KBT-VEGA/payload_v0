@@ -25,6 +25,8 @@ public:
     return h;
   }
 
+  void powerDown() { Serial.println("Stop reading from DHT11"); }
+
 private:
   DHT dht = DHT(DHTPIN, DHTTYPE);
 };
