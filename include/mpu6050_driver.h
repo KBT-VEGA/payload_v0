@@ -36,6 +36,22 @@ public:
     gz = g.gyro.z;
   }
 
+  bool testConnection() {
+    float ax, ay, az, gx, gy, gz;
+    readAccelGyro(ax, ay, az, gx, gy, gz);
+
+    // Calculate the acceleration vector magnitude in g
+    float accelMag = sqrtf(ax * ax + ay * ay + az * az);
+
+    // Check if accelMag is within reasonable range (near 1g at rest)
+    bool valid = (accelMag > 0.5f) && (accelMag < 2.0f);
+
+    if (!valid) {
+      Serial.println("MPU6050 acceleration sanity check FAILED!");
+    }
+    return valid;
+  }
+
   void powerDown() { Serial.println("Stop using MPU6050"); }
 
 private:
