@@ -12,7 +12,7 @@ DHT11_Driver dht;
 MPU6050_Driver imu;
 Compass_Driver compass;
 GPS_Driver gps;
-Buzzer_Driver buzzer;
+Buzzer_Driver buzzer(27);
 SDCard_Driver sdcard;
 
 void setup() {
@@ -26,8 +26,6 @@ void setup() {
   compass.begin();
 
   gps.begin(16, 17, 115200);
-
-  buzzer.begin(27);
 
   sdcard.begin();
 
