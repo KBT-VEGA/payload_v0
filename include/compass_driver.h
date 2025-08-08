@@ -26,6 +26,8 @@ public:
     return heading;
   }
 
+  void powerDown() { Serial.println("Stop using compass"); }
+
 private:
   Adafruit_HMC5883_Unified compass;
 };
