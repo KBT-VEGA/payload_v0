@@ -1,29 +1,35 @@
 #ifndef COMPASS_DRIVER_H
 #define COMPASS_DRIVER_H
 
-#include <QMC5883L.h>
+#include <Adafruit_HMC5883_U.h>
+#include <Adafruit_Sensor.h>
 #include <Wire.h>
 
 class Compass_Driver {
 public:
+  Compass_Driver() : compass(12345) {}
+
   void begin() {
-    compass.init();
-    compass.setMode(QMC5883L_CONTINOUS);
-    compass.setRange(QMC5883L_RANGE_2G);
-    compass.setOutputDataRate(QMC5883L_ODR_50HZ);
-    compass.setMeasurementMode(QMC5883L_CONTINOUS);
+    if (!compass.begin()) {
+      Serial.println("Failed to detect HMC5883 sensor");
+    }
   }
 
   float readHeading() {
-    compass.read();
-    float heading = atan2(compass.getY(), compass.getX()) * 180.0 / PI;
-    if (heading < 0)
+    sensors_event_t event;
+    compass.getEvent(&event);
+
+    float heading = atan2(event.magnetic.y, event.magnetic.x) * 180.0 / PI;
+    if (heading < 0) {
       heading += 360.0;
+    }
     return heading;
   }
 
+  void powerDown() { Serial.println("Stop using compass"); }
+
 private:
-  QMC5883L compass;
+  Adafruit_HMC5883_Unified compass;
 };
 
 #endif // !COMPASS_DRIVER_H

@@ -11,16 +11,6 @@ public:
   explicit SDCard_Driver(uint8_t csPin = 5)
       : _csPin(csPin), _initialized(false) {}
 
-  // Initialize SD card; return true on success
-  bool begin(uint8_t csPin) {
-    if (SD.begin(csPin)) {
-      _initialized = true;
-      return true;
-    }
-    _initialized = false;
-    return false;
-  }
-
   // Append a line (with newline) to a file
   bool writeLine(const String &fileName, const String &data) {
     if (!_initialized)

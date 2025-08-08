@@ -6,14 +6,15 @@
 #include "../include/compass_driver.h"
 #include "../include/gps_driver.h"
 #include "../include/sdcard_driver.h"
+#include "../include/test_functions.h"
 
 BMP280_Driver bmp;
 DHT11_Driver dht;
-MPU6050_Driver imu;
+MPU6050_Driver mpu;
 Compass_Driver compass;
 GPS_Driver gps;
-Buzzer_Driver buzzer;
-SDCard_Driver sdcard;
+Buzzer_Driver buzzer(27);
+SDCard_Driver sdcard(5);
 
 void setup() {
   Serial.begin(115200);
@@ -22,16 +23,14 @@ void setup() {
   if (!bmp.begin()) Serial.println("BMP280 init failed");
 
   dht.begin();
-  imu.begin();
+  mpu.begin();
   compass.begin();
 
   gps.begin(16, 17, 115200);
 
-  buzzer.begin(27);
+  testAllSensors(bmp, dht, mpu, compass, gps, buzzer, sdcard);
 
-  sdcard.begin();
-
-  stateMachineInit(bmp, dht, imu, compass, gps, buzzer);
+  stateMachineInit(bmp, dht, mpu, compass, gps, buzzer, sdcard);
 }
 
 void loop() {

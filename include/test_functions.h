@@ -102,13 +102,15 @@ bool testSDCard(SDCard_Driver &sdcard) {
 
   return (readData.length() > 0);
 }
-bool testAllSensors() {
+bool testAllSensors(BMP280_Driver &bmp, DHT11_Driver &dht, MPU6050_Driver &mpu,
+                    Compass_Driver &compass, GPS_Driver &gps,
+                    Buzzer_Driver &buzzer, SDCard_Driver &sdcard) {
   Serial.println("=== STARTING STATIC SENSOR TESTS ===");
   bool allTestsPassed = true;
 
   // Test BMP280
   Serial.print("Testing BMP280... ");
-  if (testBMP280()) {
+  if (testBMP280(bmp)) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
@@ -117,7 +119,7 @@ bool testAllSensors() {
 
   // Test DHT11
   Serial.print("Testing DHT11... ");
-  if (testDHT11()) {
+  if (testDHT11(dht)) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
@@ -126,7 +128,7 @@ bool testAllSensors() {
 
   // Test MPU6050
   Serial.print("Testing MPU6050... ");
-  if (testMPU6050()) {
+  if (testMPU6050(mpu)) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
@@ -135,7 +137,7 @@ bool testAllSensors() {
 
   // Test Compass
   Serial.print("Testing Compass... ");
-  if (testCompass()) {
+  if (testCompass(compass)) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
@@ -144,7 +146,7 @@ bool testAllSensors() {
 
   // Test GPS
   Serial.print("Testing GPS... ");
-  if (testGPS()) {
+  if (testGPS(gps)) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
@@ -153,7 +155,7 @@ bool testAllSensors() {
 
   // Test Buzzer
   Serial.print("Testing Buzzer... ");
-  if (testBuzzer()) {
+  if (testBuzzer(buzzer)) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
@@ -162,7 +164,7 @@ bool testAllSensors() {
 
   // Test SD Card
   Serial.print("Testing SD Card... ");
-  if (testSDCard()) {
+  if (testSDCard(sdcard)) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
