@@ -1,7 +1,8 @@
 #ifndef MPU6050_DRIVER_H
 #define MPU6050_DRIVER_H
 
-#include <MPU6050.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
 #include <Wire.h>
 #include <cstdint>
 
@@ -9,29 +10,36 @@ class MPU6050_Driver {
 public:
   void begin() {
     Wire.begin();
-    mpu.initialize();
+    if (!mpu.begin()) {
+      Serial.println("Failed to find MPU6050 chip");
+      while (1) {
+        delay(10);
+      }
+    }
+    mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
+    mpu.setGyroRange(MPU6050_RANGE_250_DEG);
+    mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
   }
-
-  bool testConnection() { return mpu.testConnection(); }
 
   void readAccelGyro(float &ax, float &ay, float &az, float &gx, float &gy,
                      float &gz) {
-    int16_t accelX, accelY, accelZ, gyroX, gyroY, gyroZ;
-    mpu.getMotion6(&accelX, &accelY, &accelZ, &gyroX, &gyroY, &gyroZ);
-    ax = accelX / 16384.0f; // assuming default range ±2g
-    ay = accelY / 16384.0f;
-    az = accelZ / 16384.0f;
-    gx = gyroX / 131.0f; // assuming default range ±250°/s
-    gy = gyroY / 131.0f;
-    gz = gyroZ / 131.0f;
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+
+    // Convert accelerometer readings from m/s² to g by dividing by 9.80665
+    ax = a.acceleration.x / 9.80665f;
+    ay = a.acceleration.y / 9.80665f;
+    az = a.acceleration.z / 9.80665f;
+
+    gx = g.gyro.x;
+    gy = g.gyro.y;
+    gz = g.gyro.z;
   }
 
-  void powerDown() {
-    mpu.setSleepEnabled(true); // Put MPU6050 to sleep
-  }
+  void powerDown() { Serial.println("Stop using MPU6050"); }
 
 private:
-  MPU6050 mpu;
+  Adafruit_MPU6050 mpu;
 };
 
 #endif // !MPU6050_DRIVER_H
