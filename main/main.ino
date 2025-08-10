@@ -6,6 +6,7 @@
 #include "../include/compass_driver.h"
 #include "../include/gps_driver.h"
 #include "../include/sdcard_driver.h"
+#include "../include/lora_driver.h"
 #include "../include/test_functions.h"
 
 BMP280_Driver bmp;
@@ -15,6 +16,7 @@ Compass_Driver compass;
 GPS_Driver gps;
 Buzzer_Driver buzzer(27);
 SDCard_Driver sdcard(5);
+LoRaDriver lora(17, 16, 0, 433E6);
 
 void setup() {
   Serial.begin(115200);
@@ -27,6 +29,8 @@ void setup() {
   compass.begin();
 
   gps.begin(16, 17, 115200);
+
+  lora.begin();
 
   testAllSensors(bmp, dht, mpu, compass, gps, buzzer, sdcard);
 
