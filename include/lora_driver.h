@@ -48,7 +48,7 @@ public:
     return true;
   }
 
-  bool isInitialized() const { return _initialized };
+  bool isInitialized() const { return _initialized; }
 
 private:
   uint8_t _csPin, _rstPin, _dio0Pin;
