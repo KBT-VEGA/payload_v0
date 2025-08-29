@@ -16,7 +16,7 @@ Compass_Driver compass;
 GPS_Driver gps;
 Buzzer_Driver buzzer(27);
 SDCard_Driver sdcard(5);
-LoRaDriver lora(17, 16, 0, 433E6);
+LoRaDriver lora(17, 16, 14, 433E6);
 
 void setup() {
   Serial.begin(115200);
@@ -28,7 +28,7 @@ void setup() {
   mpu.begin();
   compass.begin();
 
-  gps.begin(16, 17, 115200);
+  gps.begin(13, 15, 115200);
 
   lora.begin();
 
