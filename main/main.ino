@@ -32,9 +32,9 @@ void setup() {
 
   lora.begin();
 
-  testAllSensors(bmp, dht, mpu, compass, gps, buzzer, sdcard);
+  testAllSensors(bmp, dht, mpu, compass, gps, buzzer, sdcard, lora);
 
-  stateMachineInit(bmp, dht, mpu, compass, gps, buzzer, sdcard);
+  stateMachineInit(bmp, dht, mpu, compass, gps, buzzer, sdcard, lora);
 }
 
 void loop() {

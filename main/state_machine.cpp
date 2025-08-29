@@ -9,6 +9,7 @@ static Compass_Driver *compass_ptr = nullptr;
 static GPS_Driver *gps_ptr = nullptr;
 static Buzzer_Driver *buzzer_ptr = nullptr;
 static SDCard_Driver *sdcard_ptr = nullptr;
+static LoRaDriver *lora_ptr = nullptr;
 
 // current state
 static FlightState currentState = PRELAUNCH;
@@ -164,7 +165,7 @@ static void verifySensorSanity() {
 void stateMachineInit(BMP280_Driver &bmp, DHT11_Driver &dht,
                       MPU6050_Driver &mpu, Compass_Driver &compass,
                       GPS_Driver &gps, Buzzer_Driver &buzzer,
-                      SDCard_Driver &sdcard) {
+                      SDCard_Driver &sdcard, LoRaDriver &lora) {
   bmp_ptr = &bmp;
   dht_ptr = &dht;
   mpu_ptr = &mpu;
@@ -172,6 +173,7 @@ void stateMachineInit(BMP280_Driver &bmp, DHT11_Driver &dht,
   gps_ptr = &gps;
   buzzer_ptr = &buzzer;
   sdcard_ptr = &sdcard;
+  lora_ptr = &lora;
 
   currentState = PRELAUNCH;
 
