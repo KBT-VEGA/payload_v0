@@ -9,8 +9,8 @@ class GPS_Driver {
 public:
   GPS_Driver() : serial_gps(1) {} // UART1
 
-  void begin(int rxPin, int txPin, uint32_t baud = 9600) {
-    serial_gps.begin(baud, SERIAL_8N1, rxPin, txPin);
+  void begin(int espRx, int espTx, uint32_t baud = 9600) {
+    serial_gps.begin(baud, SERIAL_8N1, espRx, espTx);
   }
 
   bool available() { return serial_gps.available(); }
