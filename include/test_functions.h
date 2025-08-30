@@ -85,7 +85,7 @@ bool testBuzzer(Buzzer_Driver &buzzer) {
 }
 
 bool testSDCard(SDCard_Driver &sdcard) {
-  if (!sdcard.isInitialized()) {
+  if (!sdcard.begin()) {
     Serial.println("  SD not initialized");
     return false;
   }
@@ -138,13 +138,13 @@ bool testAllSensors(BMP280_Driver &bmp, DHT11_Driver &dht, MPU6050_Driver &mpu,
   }
 
   // Test DHT11
-  // Serial.print("Testing DHT11... ");
-  // if (testDHT11(dht)) {
-  //   Serial.println("PASSED");
-  // } else {
-  //   Serial.println("FAILED");
-  //   allTestsPassed = false;
-  // }
+  Serial.print("Testing DHT11... ");
+  if (testDHT11(dht)) {
+    Serial.println("PASSED");
+  } else {
+    Serial.println("FAILED");
+    allTestsPassed = false;
+  }
 
   // Test MPU6050
   Serial.print("Testing MPU6050... ");
@@ -156,31 +156,31 @@ bool testAllSensors(BMP280_Driver &bmp, DHT11_Driver &dht, MPU6050_Driver &mpu,
   }
 
   // Test Compass
-  // Serial.print("Testing Compass... ");
-  // if (testCompass(compass)) {
-  //   Serial.println("PASSED");
-  // } else {
-  //   Serial.println("FAILED");
-  //   allTestsPassed = false;
-  // }
+  Serial.print("Testing Compass... ");
+  if (testCompass(compass)) {
+    Serial.println("PASSED");
+  } else {
+    Serial.println("FAILED");
+    allTestsPassed = false;
+  }
 
   // Test GPS
-  // Serial.print("Testing GPS... ");
-  // if (testGPS(gps)) {
-  //   Serial.println("PASSED");
-  // } else {
-  //   Serial.println("FAILED");
-  //   allTestsPassed = false;
-  // }
+  Serial.print("Testing GPS... ");
+  if (testGPS(gps)) {
+    Serial.println("PASSED");
+  } else {
+    Serial.println("FAILED");
+    allTestsPassed = false;
+  }
 
-  // // Test Buzzer
-  // Serial.print("Testing Buzzer... ");
-  // if (testBuzzer(buzzer)) {
-  //   Serial.println("PASSED");
-  // } else {
-  //   Serial.println("FAILED");
-  //   allTestsPassed = false;
-  // }
+  // Test Buzzer
+  Serial.print("Testing Buzzer... ");
+  if (testBuzzer(buzzer)) {
+    Serial.println("PASSED");
+  } else {
+    Serial.println("FAILED");
+    allTestsPassed = false;
+  }
 
   // Test SD Card
   Serial.print("Testing SD Card... ");
