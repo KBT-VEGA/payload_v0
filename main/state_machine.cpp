@@ -9,6 +9,7 @@ static Compass_Driver *compass_ptr = nullptr;
 static GPS_Driver *gps_ptr = nullptr;
 static Buzzer_Driver *buzzer_ptr = nullptr;
 static SDCard_Driver *sdcard_ptr = nullptr;
+static LoRaDriver *lora_ptr = nullptr;
 
 // current state
 static FlightState currentState = PRELAUNCH;
@@ -97,6 +98,55 @@ static bool detectLanding() {
   return false;
 }
 
+static void transmitAndLogData() {
+  static unsigned long lastLoRaSend = 0;
+  unsigned long now = millis();
+
+  if (!bmp_ptr || !dht_ptr || !mpu_ptr || !compass_ptr || !gps_ptr)
+    return;
+
+  // collect data
+  // bmp
+  float temp_bmp = bmp_ptr->readTemperature_C();
+  float pres = bmp_ptr->returnPressure_hPa();
+  float alt = getAltitude();
+
+  // dht
+  float temp_dht = dht_ptr->readTemperature();
+  float hum = dht_ptr->readHumidity();
+
+  // mpu
+  float ax, ay, az, gx, gy, gz;
+  mpu_ptr->readAccelGyro(ax, ay, az, gx, gy, gz);
+
+  // compass
+  float heading = compass_ptr->readHeading();
+
+  // gps
+  gps_ptr->read();
+  float lat = gps_ptr->latitude();
+  float lon = gps_ptr->longitude();
+
+  // format into csv string
+  String packet =
+      String(millis()) + "," + String(temp_bmp, 2) + "," + String(pres, 2) +
+      "," + String(alt, 2) + "," + String(temp_dht, 2) + "," + String(hum, 2) +
+      "," + String(ax, 2) + "," + String(ay, 2) + "," + String(az, 2) + "," +
+      String(heading, 2) + "," + String(lat, 6) + "," + String(lon, 6);
+
+  // send data over lora
+  if (now - lastLoRaSend >= 1000) { // 1 second rate limit
+    if (lora_ptr && lora_ptr->isInitialized()) {
+      lora_ptr->sendPacket(packet);
+    }
+  }
+
+  // log to sd card
+  if (sdcard_ptr) {
+    sdcard_ptr->writeLine("/flight_log.csv", packet);
+  }
+}
+
 // helper for calibration sensor condition
 static void checkSensorCondition(bool condition, const char *sensorName) {
   if (condition) {
@@ -164,7 +214,7 @@ static void verifySensorSanity() {
 void stateMachineInit(BMP280_Driver &bmp, DHT11_Driver &dht,
                       MPU6050_Driver &mpu, Compass_Driver &compass,
                       GPS_Driver &gps, Buzzer_Driver &buzzer,
-                      SDCard_Driver &sdcard) {
+                      SDCard_Driver &sdcard, LoRaDriver &lora) {
   bmp_ptr = &bmp;
   dht_ptr = &dht;
   mpu_ptr = &mpu;
@@ -172,6 +222,7 @@ void stateMachineInit(BMP280_Driver &bmp, DHT11_Driver &dht,
   gps_ptr = &gps;
   buzzer_ptr = &buzzer;
   sdcard_ptr = &sdcard;
+  lora_ptr = &lora;
 
   currentState = PRELAUNCH;
 
@@ -197,7 +248,8 @@ void stateMachineUpdate() {
     }
     break;
   case ASCENT:
-    // TODO: monitor sensors, log and send data over telemetry
+    // log and send data over telemetry
+    transmitAndLogData();
 
     // transition on altitude decrease inidicating start of descent
     if (detectDescent()) {
@@ -207,8 +259,8 @@ void stateMachineUpdate() {
     break;
 
   case DESCENT:
-    // TODO: track descent, position, keep logging and sending data over
-    // telemetry
+    // log and send data
+    transmitAndLogData();
 
     // check if landed (no altitude change for given duration)
     if (detectLanding()) {
@@ -248,12 +300,12 @@ void stateMachineUpdate() {
     break;
 
   case POSTLAND:
-    // TODO: keep sending gps data, beacon is active
+    transmitAndLogData();
     if (gps_ptr) {
       gps_ptr->read();
 
       if (gps_ptr->locationUpdated()) {
-        // TODO: send gps data over telem
+        transmitAndLogData();
       }
     }
     break;
