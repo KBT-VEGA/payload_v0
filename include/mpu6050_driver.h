@@ -9,7 +9,6 @@
 class MPU6050_Driver {
 public:
   void begin() {
-    Wire.begin();
     if (!mpu.begin()) {
       Serial.println("Failed to find MPU6050 chip");
       while (1) {
