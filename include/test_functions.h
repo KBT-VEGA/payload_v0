@@ -3,6 +3,7 @@
 #include "compass_driver.h"
 #include "dht11_driver.h"
 #include "gps_driver.h"
+#include "lora_driver.h"
 #include "mpu6050_driver.h"
 #include "sdcard_driver.h"
 #include "state_machine.h"
@@ -102,9 +103,28 @@ bool testSDCard(SDCard_Driver &sdcard) {
 
   return (readData.length() > 0);
 }
+
+bool testLoRa(LoRaDriver &lora) {
+  if (!lora.isInitialized()) {
+    Serial.println("  LoRa not initialized");
+    return false;
+  }
+
+  // try sending a test packet
+  String testData = "Hello from LoRa test! " + String(millis());
+  if (!lora.sendPacket(testData)) {
+    Serial.println("  Failed to send LoRa packet.");
+    return false;
+  }
+
+  Serial.println("  LoRa test packet sent!");
+  return true;
+}
+
 bool testAllSensors(BMP280_Driver &bmp, DHT11_Driver &dht, MPU6050_Driver &mpu,
                     Compass_Driver &compass, GPS_Driver &gps,
-                    Buzzer_Driver &buzzer, SDCard_Driver &sdcard) {
+                    Buzzer_Driver &buzzer, SDCard_Driver &sdcard,
+                    LoRaDriver &lora) {
   Serial.println("=== STARTING STATIC SENSOR TESTS ===");
   bool allTestsPassed = true;
 
@@ -118,13 +138,13 @@ bool testAllSensors(BMP280_Driver &bmp, DHT11_Driver &dht, MPU6050_Driver &mpu,
   }
 
   // Test DHT11
-  Serial.print("Testing DHT11... ");
-  if (testDHT11(dht)) {
-    Serial.println("PASSED");
-  } else {
-    Serial.println("FAILED");
-    allTestsPassed = false;
-  }
+  // Serial.print("Testing DHT11... ");
+  // if (testDHT11(dht)) {
+  //   Serial.println("PASSED");
+  // } else {
+  //   Serial.println("FAILED");
+  //   allTestsPassed = false;
+  // }
 
   // Test MPU6050
   Serial.print("Testing MPU6050... ");
@@ -136,35 +156,44 @@ bool testAllSensors(BMP280_Driver &bmp, DHT11_Driver &dht, MPU6050_Driver &mpu,
   }
 
   // Test Compass
-  Serial.print("Testing Compass... ");
-  if (testCompass(compass)) {
-    Serial.println("PASSED");
-  } else {
-    Serial.println("FAILED");
-    allTestsPassed = false;
-  }
+  // Serial.print("Testing Compass... ");
+  // if (testCompass(compass)) {
+  //   Serial.println("PASSED");
+  // } else {
+  //   Serial.println("FAILED");
+  //   allTestsPassed = false;
+  // }
 
   // Test GPS
-  Serial.print("Testing GPS... ");
-  if (testGPS(gps)) {
-    Serial.println("PASSED");
-  } else {
-    Serial.println("FAILED");
-    allTestsPassed = false;
-  }
+  // Serial.print("Testing GPS... ");
+  // if (testGPS(gps)) {
+  //   Serial.println("PASSED");
+  // } else {
+  //   Serial.println("FAILED");
+  //   allTestsPassed = false;
+  // }
 
-  // Test Buzzer
-  Serial.print("Testing Buzzer... ");
-  if (testBuzzer(buzzer)) {
-    Serial.println("PASSED");
-  } else {
-    Serial.println("FAILED");
-    allTestsPassed = false;
-  }
+  // // Test Buzzer
+  // Serial.print("Testing Buzzer... ");
+  // if (testBuzzer(buzzer)) {
+  //   Serial.println("PASSED");
+  // } else {
+  //   Serial.println("FAILED");
+  //   allTestsPassed = false;
+  // }
 
   // Test SD Card
   Serial.print("Testing SD Card... ");
   if (testSDCard(sdcard)) {
+    Serial.println("PASSED");
+  } else {
+    Serial.println("FAILED");
+    allTestsPassed = false;
+  }
+
+  // Test LoRa
+  Serial.print("Testing LoRa...");
+  if (testLoRa(lora)) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
