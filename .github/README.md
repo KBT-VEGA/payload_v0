@@ -13,16 +13,7 @@ This directory contains GitHub Actions workflows for automated build checks and 
 - Uploads build artifacts
 - Matrix strategy ready for multiple environments
 
-### 2. Code Quality Check (`code-quality.yml`)
-
-**Triggers:** Push/PR to main or develop branches
-
-- Checks for code style issues (trailing whitespace, tabs, long lines)
-- Verifies include guards in header files
-- Identifies TODO/FIXME comments
-- Performs syntax checking with PlatformIO
-
-### 3. Library Dependency Check (`dependencies.yml`)
+### 2. Library Dependency Check (`dependencies.yml`)
 
 **Triggers:** Push/PR to main or develop branches, weekly schedule
 
@@ -31,7 +22,7 @@ This directory contains GitHub Actions workflows for automated build checks and 
 - Verifies all dependencies can be resolved
 - Runs weekly to catch library updates
 
-### 4. Multi-Environment Build (`multi-build.yml`)
+### 3. Multi-Environment Build (`multi-build.yml`)
 
 **Triggers:** Push/PR to main branch
 
@@ -40,7 +31,7 @@ This directory contains GitHub Actions workflows for automated build checks and 
 - Caches build dependencies efficiently
 - Uploads firmware artifacts with unique names
 
-### 5. Release Build (`release.yml`)
+### 4. Release Build (`release.yml`)
 
 **Triggers:** Git tags starting with 'v' (e.g., v1.0.0)
 
@@ -61,7 +52,6 @@ To require these checks to pass before merging:
 4. Enable "Require status checks to pass before merging"
 5. Select the following checks:
    - `build`
-   - `lint`
    - `dependency-check`
    - `build-matrix`
 
@@ -107,10 +97,6 @@ Edit the `max_size` value in `multi-build.yml`:
 ```yaml
 max_size=1200000 # Adjust based on your partition scheme
 ```
-
-### Code Quality Rules
-
-Modify the checks in `code-quality.yml` to match your coding standards.
 
 ## Artifacts
 
