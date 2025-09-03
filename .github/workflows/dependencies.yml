@@ -1,0 +1,51 @@
+name: Library Dependency Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run weekly to check for library updates
+    - cron: "0 0 * * 0"
+
+jobs:
+  dependency-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio
+
+      - name: Update library index
+        run: pio lib update
+
+      - name: Check library dependencies
+        run: |
+          echo "Checking library dependencies..."
+          pio lib list
+
+          echo "Checking for outdated libraries..."
+          pio lib outdated || echo "No outdated libraries found"
+
+      - name: Install dependencies
+        run: pio lib install
+
+      - name: Verify all dependencies are resolved
+        run: |
+          echo "Verifying dependency resolution..."
+          if pio lib list | grep -q "Unknown"; then
+            echo "Error: Some dependencies could not be resolved"
+            exit 1
+          else
+            echo "All dependencies resolved successfully"
+          fi

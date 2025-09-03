@@ -1,0 +1,77 @@
+name: Multi-Environment Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - environment: esp32dev
+            platform: espressif32
+            board: esp32dev
+          # Add more environments if needed in the future
+          # - environment: esp32-s3
+          #   platform: espressif32
+          #   board: esp32-s3-devkitc-1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-pio-${{ matrix.environment }}-${{ hashFiles('platformio.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pio-${{ matrix.environment }}-
+            ${{ runner.os }}-pio-
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio
+
+      - name: Build for ${{ matrix.environment }}
+        run: |
+          echo "Building for environment: ${{ matrix.environment }}"
+          pio run -e ${{ matrix.environment }} -v
+
+      - name: Check binary size
+        run: |
+          echo "Checking binary size for ${{ matrix.environment }}..."
+          if [ -f ".pio/build/${{ matrix.environment }}/firmware.bin" ]; then
+            size=$(stat -c%s ".pio/build/${{ matrix.environment }}/firmware.bin")
+            echo "Firmware size: $size bytes"
+            # ESP32 has ~1.2MB available for app partition typically
+            max_size=1200000
+            if [ $size -gt $max_size ]; then
+              echo "Warning: Firmware size ($size bytes) exceeds recommended size ($max_size bytes)"
+              exit 1
+            else
+              echo "Firmware size is within acceptable limits"
+            fi
+          else
+            echo "Firmware binary not found"
+            exit 1
+          fi
+
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.environment }}-${{ github.sha }}
+          path: |
+            .pio/build/${{ matrix.environment }}/firmware.bin
+            .pio/build/${{ matrix.environment }}/firmware.elf
+          retention-days: 14
