@@ -1,3 +1,6 @@
+#ifndef TEST_FUNCTIONS_H
+#define TEST_FUNCTIONS_H
+
 #include "bmp280_driver.h"
 #include "buzzer_driver.h"
 #include "compass_driver.h"
@@ -9,7 +12,8 @@
 #include "state_machine.h"
 #include <stdio.h>
 
-bool testBMP280(BMP280_Driver &bmp) {
+bool testBMP280(BMP280_Driver &bmp)
+{
   float temp = bmp.readTemperature_C();
   float pressure = bmp.returnPressure_hPa();
   float altitude = bmp.calculateAltitude();
@@ -22,7 +26,8 @@ bool testBMP280(BMP280_Driver &bmp) {
           pressure >= 300.0f && pressure <= 1100.0f && !isnan(altitude));
 }
 
-bool testDHT11(DHT11_Driver &dht) {
+bool testDHT11(DHT11_Driver &dht)
+{
   float temp = dht.readTemperature();
   float humidity = dht.readHumidity();
 
@@ -32,8 +37,10 @@ bool testDHT11(DHT11_Driver &dht) {
           humidity >= 0.0f && humidity <= 100.0f);
 }
 
-bool testMPU6050(MPU6050_Driver &mpu) {
-  if (!mpu.testConnection()) {
+bool testMPU6050(MPU6050_Driver &mpu)
+{
+  if (!mpu.testConnection())
+  {
     Serial.println("  Connection failed");
     return false;
   }
@@ -50,21 +57,25 @@ bool testMPU6050(MPU6050_Driver &mpu) {
           accelMag <= 2.0f); // Should be close to 1g at rest
 }
 
-bool testCompass(Compass_Driver &compass) {
+bool testCompass(Compass_Driver &compass)
+{
   float heading = compass.readHeading();
   Serial.printf("  Heading: %.2f degrees\n", heading);
 
   return (heading >= 0.0f && heading <= 360.0f);
 }
 
-bool testGPS(GPS_Driver &gps) {
+bool testGPS(GPS_Driver &gps)
+{
   // GPS test requires time to acquire satellites
   Serial.println("  Waiting for GPS data (10 seconds)...");
   unsigned long startTime = millis();
 
-  while (millis() - startTime < 10000) { // Wait 10 seconds
+  while (millis() - startTime < 10000)
+  { // Wait 10 seconds
     gps.read();
-    if (gps.hasFix()) {
+    if (gps.hasFix())
+    {
       Serial.printf("  GPS Fix acquired! Lat: %.6f, Lon: %.6f\n",
                     gps.latitude(), gps.longitude());
       Serial.printf("  Satellites: %d, HDOP: %.2f\n", gps.satellites(),
@@ -78,21 +89,25 @@ bool testGPS(GPS_Driver &gps) {
   return false; // Return false but don't fail overall test if indoors
 }
 
-bool testBuzzer(Buzzer_Driver &buzzer) {
+bool testBuzzer(Buzzer_Driver &buzzer)
+{
   Serial.println("  Playing test tone...");
   buzzer.beep(1000, 500); // 1kHz for 500ms
   return true;            // If no crash, assume it works
 }
 
-bool testSDCard(SDCard_Driver &sdcard) {
-  if (!sdcard.begin()) {
+bool testSDCard(SDCard_Driver &sdcard)
+{
+  if (!sdcard.begin())
+  {
     Serial.println("  SD not initialized");
     return false;
   }
 
   // Test write and read
   String testData = "Test line: " + String(millis());
-  if (!sdcard.writeLine("/test.txt", testData)) {
+  if (!sdcard.writeLine("/test.txt", testData))
+  {
     Serial.println("  Write failed");
     return false;
   }
@@ -104,15 +119,18 @@ bool testSDCard(SDCard_Driver &sdcard) {
   return (readData.length() > 0);
 }
 
-bool testLoRa(LoRaDriver &lora) {
-  if (!lora.isInitialized()) {
+bool testLoRa(LoRaDriver &lora)
+{
+  if (!lora.isInitialized())
+  {
     Serial.println("  LoRa not initialized");
     return false;
   }
 
   // try sending a test packet
   String testData = "Hello from LoRa test! " + String(millis());
-  if (!lora.sendPacket(testData)) {
+  if (!lora.sendPacket(testData))
+  {
     Serial.println("  Failed to send LoRa packet.");
     return false;
   }
@@ -124,78 +142,103 @@ bool testLoRa(LoRaDriver &lora) {
 bool testAllSensors(BMP280_Driver &bmp, DHT11_Driver &dht, MPU6050_Driver &mpu,
                     Compass_Driver &compass, GPS_Driver &gps,
                     Buzzer_Driver &buzzer, SDCard_Driver &sdcard,
-                    LoRaDriver &lora) {
+                    LoRaDriver &lora)
+{
   Serial.println("=== STARTING STATIC SENSOR TESTS ===");
   bool allTestsPassed = true;
 
   // Test BMP280
   Serial.print("Testing BMP280... ");
-  if (testBMP280(bmp)) {
+  if (testBMP280(bmp))
+  {
     Serial.println("PASSED");
-  } else {
+  }
+  else
+  {
     Serial.println("FAILED");
     allTestsPassed = false;
   }
 
   // Test DHT11
   Serial.print("Testing DHT11... ");
-  if (testDHT11(dht)) {
+  if (testDHT11(dht))
+  {
     Serial.println("PASSED");
-  } else {
+  }
+  else
+  {
     Serial.println("FAILED");
     allTestsPassed = false;
   }
 
   // Test MPU6050
   Serial.print("Testing MPU6050... ");
-  if (testMPU6050(mpu)) {
+  if (testMPU6050(mpu))
+  {
     Serial.println("PASSED");
-  } else {
+  }
+  else
+  {
     Serial.println("FAILED");
     allTestsPassed = false;
   }
 
   // Test Compass
   Serial.print("Testing Compass... ");
-  if (testCompass(compass)) {
+  if (testCompass(compass))
+  {
     Serial.println("PASSED");
-  } else {
+  }
+  else
+  {
     Serial.println("FAILED");
     allTestsPassed = false;
   }
 
   // Test GPS
   Serial.print("Testing GPS... ");
-  if (testGPS(gps)) {
+  if (testGPS(gps))
+  {
     Serial.println("PASSED");
-  } else {
+  }
+  else
+  {
     Serial.println("FAILED");
     allTestsPassed = false;
   }
 
   // Test Buzzer
   Serial.print("Testing Buzzer... ");
-  if (testBuzzer(buzzer)) {
+  if (testBuzzer(buzzer))
+  {
     Serial.println("PASSED");
-  } else {
+  }
+  else
+  {
     Serial.println("FAILED");
     allTestsPassed = false;
   }
 
   // Test SD Card
   Serial.print("Testing SD Card... ");
-  if (testSDCard(sdcard)) {
+  if (testSDCard(sdcard))
+  {
     Serial.println("PASSED");
-  } else {
+  }
+  else
+  {
     Serial.println("FAILED");
     allTestsPassed = false;
   }
 
   // Test LoRa
   Serial.print("Testing LoRa...");
-  if (testLoRa(lora)) {
+  if (testLoRa(lora))
+  {
     Serial.println("PASSED");
-  } else {
+  }
+  else
+  {
     Serial.println("FAILED");
     allTestsPassed = false;
   }
@@ -206,3 +249,5 @@ bool testAllSensors(BMP280_Driver &bmp, DHT11_Driver &dht, MPU6050_Driver &mpu,
 
   return allTestsPassed;
 }
+
+#endif // TEST_FUNCTIONS_H
