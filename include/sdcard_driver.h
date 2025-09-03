@@ -11,6 +11,16 @@ public:
   explicit SDCard_Driver(uint8_t csPin = 5)
       : _csPin(csPin), _initialized(false) {}
 
+  // Initialize SD card; return true on success
+  bool begin() {
+    if (SD.begin(_csPin)) {
+      _initialized = true;
+      return true;
+    }
+    _initialized = false;
+    return false;
+  }
+
   // Append a line (with newline) to a file
   bool writeLine(const String &fileName, const String &data) {
     if (!_initialized)
@@ -41,6 +51,24 @@ public:
     return content;
   }
 
+  bool deleteFile(const String &fileName) {
+    if (!_initialized) {
+      Serial.println("SD not initialized");
+      return -1;
+    }
+    if (!SD.exists(fileName)) {
+      Serial.println("File does not exist: " + fileName);
+      return false;
+    }
+    if (SD.remove(fileName)) {
+      Serial.println("Deleted file: " + fileName);
+      return true;
+    } else {
+      Serial.println("Failed to delete file: " + fileName);
+      return false;
+    }
+  }
+
   // Delete all files in root directory
   // Returns number of files deleted or -1 on error
   int deleteAllFiles() {
@@ -60,6 +88,7 @@ public:
       if (!file.isDirectory()) {
         String filename = file.name();
         file.close();
+        Serial.println("Deleting: " + filename);
         if (SD.remove(filename)) {
           deletedCount++;
         }
