@@ -9,7 +9,7 @@ static Compass_Driver *compass_ptr = nullptr;
 static GPS_Driver *gps_ptr = nullptr;
 static Buzzer_Driver *buzzer_ptr = nullptr;
 static SDCard_Driver *sdcard_ptr = nullptr;
-static LoRaDriver *lora_ptr = nullptr;
+// static LoRaDriver *lora_ptr = nullptr;  // Commented out LoRa
 
 // current state
 static FlightState currentState = PRELAUNCH;
@@ -30,15 +30,18 @@ static const float ALTITUDE_CHANGE_THRESHOLD =
 static bool sensorsCalibrated = false;
 
 // helper to read altitude from BMP280
-static float getAltitude() {
+static float getAltitude()
+{
   if (bmp_ptr)
     return bmp_ptr->calculateAltitude(1013.25f);
   return NAN;
 }
 
 // helper to read acceleration magnitude from MPU6050
-static float getAccelGyro() {
-  if (mpu_ptr) {
+static float getAccelGyro()
+{
+  if (mpu_ptr)
+  {
     float ax, ay, az, gx, gy, gz;
     mpu_ptr->readAccelGyro(ax, ay, az, gx, gy, gz);
     return sqrtf(ax * ax + ay * ay + az * az);
@@ -47,9 +50,11 @@ static float getAccelGyro() {
 }
 
 // helper to check increase in altitude and acceleration in PRELAUNCH
-static bool detectLaunch() {
+static bool detectLaunch()
+{
   float alt = getAltitude();
-  if (isnan(initialAltitude)) {
+  if (isnan(initialAltitude))
+  {
     initialAltitude = alt;
     return false;
   }
@@ -57,7 +62,8 @@ static bool detectLaunch() {
   // launch if altitude increase by more than 10m or acceleration significantly
   // above 1g
   if ((alt - initialAltitude) > 10.0f ||
-      (accelMag - 1.0f) > ASCENT_ACCELERATION_THRESHOLD) {
+      (accelMag - 1.0f) > ASCENT_ACCELERATION_THRESHOLD)
+  {
     Serial.println("Launch detected");
     return true;
   }
@@ -65,9 +71,11 @@ static bool detectLaunch() {
 }
 
 // helper to detect descent (altitude starting to dcrease)
-static bool detectDescent() {
+static bool detectDescent()
+{
   float alt = getAltitude();
-  if (!isnan(lastAltitude) && alt < lastAltitude - 1.0f) { // altitude drop > 1m
+  if (!isnan(lastAltitude) && alt < lastAltitude - 1.0f)
+  { // altitude drop > 1m
     Serial.println("Descent detected");
     return true;
   }
@@ -75,30 +83,39 @@ static bool detectDescent() {
 }
 
 // helper to detect stable altitude (landing)
-static bool detectLanding() {
+static bool detectLanding()
+{
   float alt = getAltitude();
-  if (isnan(lastAltitude)) {
+  if (isnan(lastAltitude))
+  {
     lastAltitude = alt;
     return false;
   }
   float diff = fabsf(alt - lastAltitude);
   lastAltitude = alt;
 
-  if (diff < ALTITUDE_CHANGE_THRESHOLD) {
+  if (diff < ALTITUDE_CHANGE_THRESHOLD)
+  {
     unsigned long now = millis();
-    if (landedStableTime == 0) {
+    if (landedStableTime == 0)
+    {
       landedStableTime = now;
-    } else if (now - landedStableTime >= LANDING_STABLE_DURATION_MS) {
+    }
+    else if (now - landedStableTime >= LANDING_STABLE_DURATION_MS)
+    {
       Serial.println("Landing detected");
       return true;
     }
-  } else {
+  }
+  else
+  {
     landedStableTime = 0;
   }
   return false;
 }
 
-static void transmitAndLogData() {
+static void transmitAndLogData()
+{
   static unsigned long lastLoRaSend = 0;
   unsigned long now = millis();
 
@@ -135,36 +152,43 @@ static void transmitAndLogData() {
       String(heading, 2) + "," + String(lat, 6) + "," + String(lon, 6);
 
   // send data over lora
-  if (now - lastLoRaSend >= 1000) { // 1 second rate limit
-    if (lora_ptr && lora_ptr->isInitialized()) {
-      lora_ptr->sendPacket(packet);
-    }
-  }
+  // if (now - lastLoRaSend >= 1000) { // 1 second rate limit
+  //   if (lora_ptr && lora_ptr->isInitialized()) {
+  //     lora_ptr->sendPacket(packet);
+  //   }
+  // }
 
   // log to sd card
-  if (sdcard_ptr) {
+  if (sdcard_ptr)
+  {
     sdcard_ptr->writeLine("/flight_log.csv", packet);
   }
 }
 
 // helper for calibration sensor condition
-static void checkSensorCondition(bool condition, const char *sensorName) {
-  if (condition) {
+static void checkSensorCondition(bool condition, const char *sensorName)
+{
+  if (condition)
+  {
     Serial.print(sensorName);
     Serial.println(" sanity check PASSED.");
-  } else {
+  }
+  else
+  {
     Serial.print(sensorName);
     Serial.println(" sanity check FAILED!");
   }
 }
 
 // sensor sanity check function
-static void verifySensorSanity() {
+static void verifySensorSanity()
+{
   bool result;
 
   // BMP280 temperature range -40 to +85 °C &
   // pressure range ~300 to ~1100 hPa
-  if (bmp_ptr) {
+  if (bmp_ptr)
+  {
     float temp = bmp_ptr->readTemperature_C();
     result = (!isnan(temp) && temp >= -40.0f && temp <= 85.0f);
     checkSensorCondition(result, "BMP280 Temperature");
@@ -176,7 +200,8 @@ static void verifySensorSanity() {
 
   // DHT11 temperature typically 0 to 50 °C &
   // humidity typically 20% to 90%
-  if (dht_ptr) {
+  if (dht_ptr)
+  {
     float temp = dht_ptr->readTemperature();
     result = (!isnan(temp) && temp >= 0.0f && temp <= 50.0f);
     checkSensorCondition(result, "DHT11 Temperature");
@@ -188,7 +213,8 @@ static void verifySensorSanity() {
 
   // MPU6050 accel: raw accelerations in g; we check magnitude reasonable range
   // ~0 to 16g
-  if (mpu_ptr) {
+  if (mpu_ptr)
+  {
     float ax, ay, az, gx, gy, gz;
     mpu_ptr->readAccelGyro(ax, ay, az, gx, gy, gz);
     float accelMag = sqrtf(ax * ax + ay * ay + az * az);
@@ -198,14 +224,16 @@ static void verifySensorSanity() {
   }
 
   // Compass heading check: should be between 0 and 360 degrees
-  if (compass_ptr) {
+  if (compass_ptr)
+  {
     float heading = compass_ptr->readHeading();
     result = (heading >= 0.0f && heading <= 360.0f);
     checkSensorCondition(result, "Compass Heading");
   }
 
   // GPS fix presence - simple valid fix (boolean) check
-  if (gps_ptr) {
+  if (gps_ptr)
+  {
     result = gps_ptr->hasFix();
     checkSensorCondition(result, "GPS Fix");
   }
@@ -214,7 +242,8 @@ static void verifySensorSanity() {
 void stateMachineInit(BMP280_Driver &bmp, DHT11_Driver &dht,
                       MPU6050_Driver &mpu, Compass_Driver &compass,
                       GPS_Driver &gps, Buzzer_Driver &buzzer,
-                      SDCard_Driver &sdcard, LoRaDriver &lora) {
+                      SDCard_Driver &sdcard)
+{ // Removed LoRaDriver parameter
   bmp_ptr = &bmp;
   dht_ptr = &dht;
   mpu_ptr = &mpu;
@@ -222,7 +251,7 @@ void stateMachineInit(BMP280_Driver &bmp, DHT11_Driver &dht,
   gps_ptr = &gps;
   buzzer_ptr = &buzzer;
   sdcard_ptr = &sdcard;
-  lora_ptr = &lora;
+  // lora_ptr = &lora;  // Commented out LoRa
 
   currentState = PRELAUNCH;
 
@@ -233,16 +262,20 @@ void stateMachineInit(BMP280_Driver &bmp, DHT11_Driver &dht,
   Serial.println("State machine initialized: PRELAUNCH");
 }
 
-void stateMachineUpdate() {
-  switch (currentState) {
+void stateMachineUpdate()
+{
+  switch (currentState)
+  {
   case PRELAUNCH:
-    if (!sensorsCalibrated) {
+    if (!sensorsCalibrated)
+    {
       verifySensorSanity();
       sensorsCalibrated = true;
     }
 
     // check for launch condition (altitude increase or accelration)
-    if (detectLaunch()) {
+    if (detectLaunch())
+    {
       currentState = ASCENT;
       Serial.println("Transition to ASCENT");
     }
@@ -252,7 +285,8 @@ void stateMachineUpdate() {
     transmitAndLogData();
 
     // transition on altitude decrease inidicating start of descent
-    if (detectDescent()) {
+    if (detectDescent())
+    {
       currentState = DESCENT;
       Serial.println("Transition to DESCENT");
     }
@@ -263,12 +297,14 @@ void stateMachineUpdate() {
     transmitAndLogData();
 
     // check if landed (no altitude change for given duration)
-    if (detectLanding()) {
+    if (detectLanding())
+    {
       currentState = POSTLAND;
       Serial.println("Transition to POSTLAND");
       // Power down heavy sensors (do this once)
       static bool powerDownComplete = false;
-      if (!powerDownComplete) {
+      if (!powerDownComplete)
+      {
         Serial.println("Powering down sensors...");
         if (mpu_ptr)
           mpu_ptr->powerDown();
@@ -292,7 +328,8 @@ void stateMachineUpdate() {
       //   }
       // }
 
-      if (buzzer_ptr) {
+      if (buzzer_ptr)
+      {
         // TODO: beeping pattern?
         buzzer_ptr->startTone(2000); // 2kHz tone
       }
@@ -301,10 +338,12 @@ void stateMachineUpdate() {
 
   case POSTLAND:
     transmitAndLogData();
-    if (gps_ptr) {
+    if (gps_ptr)
+    {
       gps_ptr->read();
 
-      if (gps_ptr->locationUpdated()) {
+      if (gps_ptr->locationUpdated())
+      {
         transmitAndLogData();
       }
     }
